@@ -10,8 +10,18 @@ namespace AbiturientTGBot.Service
     public class DBService
     {
         ApplicationContext db = new ApplicationContext();
+        MessageService msgService = new MessageService();
 
         // Code with users
+        public async void SetUserState(long id, string state)
+        {
+            User user = db.Users.Where(u => u.UserId == id).First();
+            user.State = state;
+
+            db.Users.Update(user);
+            await db.SaveChangesAsync();
+        }
+
         public bool IsNewUser(long id)
         {
             try
@@ -37,7 +47,7 @@ namespace AbiturientTGBot.Service
             User newUser = new User
             {
                 UserId = id,
-                State = 0,
+                State = "newUser",
                 Username = username
             };
 
@@ -45,13 +55,13 @@ namespace AbiturientTGBot.Service
             await db.SaveChangesAsync();
         }
 
-        public int GetUserState(long id)
+        public string GetUserState(long id)
         {
-            int state = 0;
+            string state;
 
             if (IsNewUser(id) == true)
             {
-                state = 0;
+                state = "notUser";
                 return state;
             }
 
@@ -77,6 +87,18 @@ namespace AbiturientTGBot.Service
         public Specialization[] GetBaseSpecializations()
         {
             return db.Specializations.Where(s => s.ClassRequired == 9).ToArray();
+        }
+
+        public string GetSpecInfo(string specQualification, int classReq)
+        {
+            Specialization specialization = db.Specializations.Where(s => s.Qualification == specQualification)
+                .Where(s => s.ClassRequired == classReq).First();
+
+            return msgService.CreateInfoMessage(specialization);
+
+            //return db.Specializations.Where(s => s.Qualification == specQualification)
+            //    .Where(s => s.ClassRequired == classReq)
+            //    .Select(s => s.Name).First();
         }
     }
 }
