@@ -48,6 +48,7 @@ namespace AbiturientTGBot.Service
                 {
                     // Method checks if its new user and adds it to data base
                     db.InsertNewUser(userId, message.From.Username);
+                    db.SetUserState(userId, "newUser");
 
                     //ReplyKeyboardMarkup keyboard = msg.CreateKeyboard(keys);
 
@@ -58,22 +59,31 @@ namespace AbiturientTGBot.Service
                     return;
                 }
 
-                int userState = db.GetUserState(userId);
+                string userState = db.GetUserState(userId);
+                string newUserState;
 
                 switch (userState)
                 {
-                    case 0:
+                    case "newUser":
                         {
                             if (message.Text.ToLower() == "после 9-ого")
                             {
                                 await botClient.SendTextMessageAsync(message.Chat,
                                     text: "Я могу тебе предложить следующие специальности: ",
                                     replyMarkup: KeyboardService.BaseSpecKeyboard);
+
+                                newUserState = "After9";
+                                db.SetUserState(userId, newUserState);
                             }
 
                             if (message.Text.ToLower() == "после 11-ого")
                             {
+                                await botClient.SendTextMessageAsync(message.Chat,
+                                    text: "Я могу тебе предложить следующие специальности: ",
+                                    replyMarkup: KeyboardService.MidSpecKeyboard);
 
+                                newUserState = "After11";
+                                db.SetUserState(userId, newUserState);
                             }
 
                             if (message.Text.ToLower() == "показать все специальности")
@@ -81,9 +91,32 @@ namespace AbiturientTGBot.Service
                                 await botClient.SendTextMessageAsync(message.Chat,
                                     text: "Я могу тебе предложить следующие специальности: ",
                                     replyMarkup: KeyboardService.SpecialityKeyboard);
+
+                                newUserState = "AllSpec";
+                                db.SetUserState(userId, newUserState);
                             }
                         }
                         break;
+
+                    case "After9":
+                        {
+                            string specInfo = string.Empty;
+                            try
+                            {
+                                specInfo = db.GetSpecInfo(message.Text, 9);
+                            }
+                            catch (Exception ex)
+                            {
+                                specInfo = "Выберите интересующую вас специальность";
+                            }
+
+                            await botClient.SendTextMessageAsync(message.Chat,
+                                 text: specInfo);
+                            
+                                 //replyMarkup: KeyboardService.SpecialityKeyboard);
+                        }
+                        break;
+
                 }
             }
         }
