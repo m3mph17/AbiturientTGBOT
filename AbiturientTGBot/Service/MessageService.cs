@@ -6,28 +6,29 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types.ReplyMarkups;
+using AbiturientTGBot.Models;
 
 namespace AbiturientTGBot.Service
 {
     public class MessageService
     {
-        public ReplyKeyboardMarkup CreateKeyboard(string[] keysText)
+        public string CreateInfoMessage(Specialization specialization)
         {
-            KeyboardButton[] buttons = new KeyboardButton[keysText.Length];
-            for (int i = 0; i < keysText.Length; i++)
-            {
-                buttons[i] = new KeyboardButton(keysText[i]);
-            }
+            string msg =
+                $"Название специальности: {specialization.Name}\n" +
+                $"Прошлое название: {specialization.PrevName}\n" +
+                $"Квалификация: {specialization.Qualification}\n" +
+                $"Срок обучения: {specialization.StudyTime}\n" +
+                //specialization.PrevPassScore == 0 ? ("") : ("")
+                $"Проходной балл в прошлом году: {specialization.PrevPassScore}\n" +
+                $"Планируемый набор (платно): {specialization.StudentsAmount}\n" +
+                $"Планируемый набор (бюджет): {specialization.FreeStudentsAmount}";
 
-            var keyboard = new ReplyKeyboardMarkup(
-                new[]
-                {
-                    buttons
-                });
 
-            keyboard.ResizeKeyboard = true;
+            if (String.IsNullOrEmpty(specialization.AddInfo) == false)
+                msg += $"\n\nДоп. информация: {specialization.AddInfo}";
 
-            return keyboard;
+            return msg;
         }
     }
 }
