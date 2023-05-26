@@ -13,12 +13,50 @@ namespace AbiturientTGBot.Service
         public ReplyKeyboardMarkup SpecialityKeyboard { get; private set; }
         public ReplyKeyboardMarkup ClassKeyboard { get; private set; }
         public ReplyKeyboardMarkup BaseSpecKeyboard { get; private set; }
+        public ReplyKeyboardMarkup MidSpecKeyboard { get; private set; }
 
         public KeyboardService()
         {
             CreateSpecKeyboard();
             CreateClassKeyboard();
             CreateBaseSpecKeyboard();
+            CreateMidSpecKeyboard();
+        }
+
+        private void CreateMidSpecKeyboard()
+        {
+            // разделение на 2 строки половина кнопок в первую, половина во вторую
+            KeyboardButton[] firstRow;
+            KeyboardButton[] secondRow;
+
+            Specialization[] specializations = db.GetMidSpecializations();
+            int firstLength = specializations.Count() / 2;
+            int secondLength = specializations.Count() - firstLength;
+            int specIndex = 0;
+
+            firstRow = new KeyboardButton[firstLength];
+            for (int i = 0; i < firstRow.Length; i++)
+            {
+                firstRow[i] = new KeyboardButton(specializations[i].Qualification);
+                specIndex = i;
+            }
+
+            specIndex++;
+            secondRow = new KeyboardButton[secondLength];
+            for (int i = 0; i < secondRow.Length; i++)
+            {
+                secondRow[i] = new KeyboardButton(specializations[specIndex].Qualification);
+                specIndex++;
+            }
+
+            MidSpecKeyboard = new ReplyKeyboardMarkup(new[]
+            {
+                firstRow,
+                secondRow
+            });
+
+            MidSpecKeyboard.ResizeKeyboard = true;
+            MidSpecKeyboard.InputFieldPlaceholder = "Для просмотра доп. информации нажми одну из кнопок";
         }
 
         private void CreateBaseSpecKeyboard()
@@ -28,7 +66,7 @@ namespace AbiturientTGBot.Service
             KeyboardButton[] secondRow;
 
             Specialization[] specializations = db.GetBaseSpecializations();
-            int firstLength = specializations.Count() / 2;
+            int firstLength = specializations.Count() / 2; 
             int secondLength = specializations.Count() - firstLength;
             int specIndex = 0;
 
@@ -71,6 +109,7 @@ namespace AbiturientTGBot.Service
             });
 
             BaseSpecKeyboard.ResizeKeyboard = true;
+            BaseSpecKeyboard.InputFieldPlaceholder = "Для просмотра доп. информации нажми одну из кнопок";
         }
 
         private void CreateSpecKeyboard()
@@ -104,6 +143,7 @@ namespace AbiturientTGBot.Service
             //    new KeyboardButton[] { Specializations[3].Qualification },
             //});
             //SpecialityKeyboard.ResizeKeyboard = true;
+            SpecialityKeyboard.InputFieldPlaceholder = "Для просмотра доп. информации нажми одну из кнопок";
         }
 
         private void CreateClassKeyboard()
