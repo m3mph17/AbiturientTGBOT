@@ -9,14 +9,12 @@ namespace AbiturientTGBot
     {
         static void Main(string[] args)
         {
-            //KeyboardService keyboardService = new KeyboardService();
-            //keyboardService.Save();
+            BotSettings botSettings = new BotSettings();
+            botSettings.LoadSettings();
 
-
-            Settings settings = new Settings();
             KeyboardService keyboardService = new KeyboardService();
 
-            BotService service = new BotService("5853125294:AAGEFhrYApRODxpPCFwjSFUQMogXQhq7Ic0", keyboardService);
+            BotService service = new BotService(botSettings.Token, keyboardService);
             ITelegramBotClient bot = service.CreateBot();
 
             bot.StartReceiving(
