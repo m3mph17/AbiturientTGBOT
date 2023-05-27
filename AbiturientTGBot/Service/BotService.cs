@@ -60,41 +60,46 @@ namespace AbiturientTGBot.Service
                 }
 
                 string userState = db.GetUserState(userId);
-                string newUserState;
+                string newUserState = string.Empty;
 
                 switch (userState)
                 {
                     case "newUser":
                         {
+                            string messageText = string.Empty;
+                            
+                            // Creating reply keyboard with one button cuz there's no empty constructror    
+                            ReplyKeyboardMarkup replyKeyboard = new ReplyKeyboardMarkup(new[] { new KeyboardButton("temp") }); 
+
                             if (message.Text.ToLower() == "после 9-ого")
                             {
-                                await botClient.SendTextMessageAsync(message.Chat,
-                                    text: "Я могу тебе предложить следующие специальности: ",
-                                    replyMarkup: KeyboardService.BaseSpecKeyboard);
-
+                                messageText = "Я могу тебе предложить следующие специальности: ";
+                                replyKeyboard = KeyboardService.BaseSpecKeyboard;
                                 newUserState = "After9";
-                                db.SetUserState(userId, newUserState);
                             }
 
                             if (message.Text.ToLower() == "после 11-ого")
                             {
-                                await botClient.SendTextMessageAsync(message.Chat,
-                                    text: "Я могу тебе предложить следующие специальности: ",
-                                    replyMarkup: KeyboardService.MidSpecKeyboard);
-
+                                messageText = "Я могу тебе предложить следующие специальности: ";
+                                replyKeyboard = KeyboardService.MidSpecKeyboard;
                                 newUserState = "After11";
-                                db.SetUserState(userId, newUserState);
                             }
 
                             if (message.Text.ToLower() == "показать все специальности")
                             {
-                                await botClient.SendTextMessageAsync(message.Chat,
-                                    text: "Я могу тебе предложить следующие специальности: ",
-                                    replyMarkup: KeyboardService.SpecialityKeyboard);
-
+                                messageText = "Я могу тебе предложить следующие специальности: ";
+                                replyKeyboard = KeyboardService.SpecialityKeyboard;
                                 newUserState = "AllSpec";
-                                db.SetUserState(userId, newUserState);
                             }
+
+                            if (messageText == "")
+                                return;
+
+                            await botClient.SendTextMessageAsync(message.Chat,
+                                text: messageText,
+                                replyMarkup: replyKeyboard);
+
+                            db.SetUserState(userId, newUserState);
                         }
                         break;
 
@@ -113,7 +118,40 @@ namespace AbiturientTGBot.Service
                             await botClient.SendTextMessageAsync(message.Chat,
                                  text: specInfo);
                             
-                                 //replyMarkup: KeyboardService.SpecialityKeyboard);
+                        }
+                        break;
+
+                    case "After11":
+                        {
+                            string specInfo = string.Empty;
+                            try
+                            {
+                                specInfo = db.GetSpecInfo(message.Text, 11);
+                            }
+                            catch (Exception ex)
+                            {
+                                specInfo = "Выберите интересующую вас специальность";
+                            }
+
+                            await botClient.SendTextMessageAsync(message.Chat,
+                                 text: specInfo);
+                        }
+                        break;
+
+                    case "AllSpec":
+                        {
+                            string specInfo = string.Empty;
+                            try
+                            {
+                                specInfo = db.GetSpecInfo(update.Message.Text);
+                            }
+                            catch (Exception ex)
+                            {
+                                specInfo = "Выберите интересующую вас специальность";
+                            }
+
+                            await botClient.SendTextMessageAsync(message.Chat,
+                                 text: specInfo);
                         }
                         break;
 
