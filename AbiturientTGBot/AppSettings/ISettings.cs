@@ -8,6 +8,8 @@ namespace AbiturientTGBot.AppSettings
 {
     internal interface ISettings
     {
+        string Path { get; set; }
         void LoadSettings();
+        void LoadSuccessPrint();
     }
 }

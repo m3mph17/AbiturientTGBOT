@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using AbiturientTGBot.AppSettings;
+using AbiturientTGBot.Bot_QA;
+using Newtonsoft.Json;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
@@ -12,11 +14,14 @@ namespace AbiturientTGBot.Service
         public CancellationTokenSource Cts { get; private set; }
         public CancellationToken CancellationToken { get; private set; }
         public ReceiverOptions ReceiverOptions { get; private set; }
-        public KeyboardService KeyboardService { get; private set; }
+        public Answers Answers { get; private set; }
 
-        // Db functions
-        DBService db = new DBService();
-        public BotService(string botToken, KeyboardService keyboardService)
+        // Services
+        DBService db;
+        KeyboardService keyboard;
+
+
+        public BotService(BotSettings botSettings, KeyboardService keyboardService, DBService dBService)
         {
             this.Cts = new CancellationTokenSource();
             this.CancellationToken = Cts.Token;
@@ -25,15 +30,15 @@ namespace AbiturientTGBot.Service
                 AllowedUpdates = { }, // receive all update types
             };
 
-            BotToken = botToken;
+            BotToken = botSettings.Token;
+            Answers = botSettings.Answers;
+            db = dBService;
 
-            KeyboardService = keyboardService;
+            keyboard = keyboardService;
         }
 
         public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
-            // Некоторые действия
-
             // If message from bot exit function
             if (update.Message.From.IsBot == true)
                 return;
@@ -48,13 +53,14 @@ namespace AbiturientTGBot.Service
                 {
                     // Method checks if its new user and adds it to data base
                     db.InsertNewUser(userId, message.From.Username);
+                    // Sets to user start state
                     db.SetUserState(userId, "newUser");
 
                     //ReplyKeyboardMarkup keyboard = msg.CreateKeyboard(keys);
 
                     await botClient.SendTextMessageAsync(message.Chat,
-                        text: "Привет, выбери после скольки классов планируешь поступать!",
-                        replyMarkup: KeyboardService.ClassKeyboard);
+                        text: Answers.StartMessage,
+                        replyMarkup: keyboard.ClassKeyboard);
 
                     return;
                 }
@@ -73,22 +79,22 @@ namespace AbiturientTGBot.Service
 
                             if (message.Text.ToLower() == "после 9-ого")
                             {
-                                messageText = "Я могу тебе предложить следующие специальности: ";
-                                replyKeyboard = KeyboardService.BaseSpecKeyboard;
+                                messageText = Answers.SpecSuggest;
+                                replyKeyboard = keyboard.BaseSpecKeyboard;
                                 newUserState = "After9";
                             }
 
                             if (message.Text.ToLower() == "после 11-ого")
                             {
-                                messageText = "Я могу тебе предложить следующие специальности: ";
-                                replyKeyboard = KeyboardService.MidSpecKeyboard;
+                                messageText = Answers.SpecSuggest;
+                                replyKeyboard = keyboard.MidSpecKeyboard;
                                 newUserState = "After11";
                             }
 
                             if (message.Text.ToLower() == "показать все специальности")
                             {
-                                messageText = "Я могу тебе предложить следующие специальности: ";
-                                replyKeyboard = KeyboardService.SpecialityKeyboard;
+                                messageText = Answers.SpecSuggest;
+                                replyKeyboard = keyboard.SpecialityKeyboard;
                                 newUserState = "AllSpec";
                             }
 
@@ -112,7 +118,7 @@ namespace AbiturientTGBot.Service
                             }
                             catch (Exception ex)
                             {
-                                specInfo = "Выберите интересующую вас специальность";
+                                specInfo = Answers.NoSpecFound;
                             }
 
                             await botClient.SendTextMessageAsync(message.Chat,
@@ -130,7 +136,7 @@ namespace AbiturientTGBot.Service
                             }
                             catch (Exception ex)
                             {
-                                specInfo = "Выберите интересующую вас специальность";
+                                specInfo = Answers.NoSpecFound;
                             }
 
                             await botClient.SendTextMessageAsync(message.Chat,
@@ -147,7 +153,7 @@ namespace AbiturientTGBot.Service
                             }
                             catch (Exception ex)
                             {
-                                specInfo = "Выберите интересующую вас специальность";
+                                specInfo = Answers.NoSpecFound;
                             }
 
                             await botClient.SendTextMessageAsync(message.Chat,

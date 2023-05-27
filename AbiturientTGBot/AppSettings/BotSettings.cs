@@ -1,41 +1,134 @@
-﻿using Newtonsoft.Json;
+﻿using AbiturientTGBot.Bot_QA;
+using Newtonsoft.Json;
 
 namespace AbiturientTGBot.AppSettings
 {
-    public class BotSettings : ISettings
+    public class BotSettings
     {
-        public string path = @"Settings\Bot.cfg";
-        public string? Token { get; set; }
+        public string CfgPath { get; set; }
+        public string AnswersPath { get; set; }
+        public string AppQuestionsPath { get; set; }
 
-        public void SaveSpecializations()
+        public string? Token { get; private set; }
+        public Answers Answers { get; private set; }
+        public ApplicationQuestions ApplicQuestions { get; private set; }
+
+        private TokenSettings tokenSet;
+        private AnswerSettings answerSet;
+        private QuestionSettings questionSet;
+
+
+        public BotSettings(string cfgPath, string answersPath, string appQuestionsPath)
         {
-            //ApplicationContext db = new ApplicationContext();
+            CfgPath = cfgPath;
+            AnswersPath = answersPath;
+            AppQuestionsPath = appQuestionsPath;
 
-            //for (int i = 0; i < Specializations.Length; i++)
-            //{
-            //    db.Specializations.Add(Specializations[i]);
-            //}
-
-            //db.SaveChanges();
+            tokenSet = new TokenSettings(CfgPath);
+            answerSet = new AnswerSettings(AnswersPath);
+            questionSet = new QuestionSettings(appQuestionsPath);
         }
 
         public void LoadSettings()
         {
-            if (File.Exists(path) == false)
+            tokenSet.LoadSettings();
+            answerSet.LoadSettings();
+            questionSet.LoadSettings();
+
+            Token = tokenSet.Token;
+            Answers = answerSet.Answers;
+            ApplicQuestions = questionSet.ApplicQuestions;
+
+            Console.WriteLine("\nНастройки бота успешно загружены\n\n");
+        }
+    }
+
+    public class TokenSettings : ISettings
+    {
+        public string Path { get; set; }
+        public string Token { get; private set; }
+
+        public TokenSettings(string path)
+        {
+            Path = path;
+        }
+
+        public void LoadSettings()
+        {
+            if (File.Exists(Path) == false)
             {
-                Console.WriteLine("Bot.cfg не найден");
-                throw new Exception("Bot.cfg file doesen't exists");
+                Console.WriteLine($"{Path} не найдено");
+                throw new Exception($"{Path} file doesen't exists");
             }
 
-            StreamReader reader = new StreamReader(path);
+            StreamReader reader = new StreamReader(Path);
             Token = reader.ReadLine();
 
-            //for (int i = 0; i < specPaths.Length; i++)
-            //{
-            //    Specializations[i] = new Specialization();
-            //    string json = File.ReadAllText(specPaths[i]);
-            //    Specializations[i] = JsonConvert.DeserializeObject<Specialization>(json);
-            //}
+            LoadSuccessPrint();
+        }
+
+        public void LoadSuccessPrint()
+        {
+            Console.WriteLine($"Токен бота из файла {Path} успешно загружен");
+        }
+    }
+
+    public class AnswerSettings : ISettings
+    {
+        public string Path { get; set; }
+        public Answers Answers { get; private set; }
+
+        public AnswerSettings(string path)
+        {
+            Path = path;
+        }
+
+        public void LoadSettings()
+        {
+            if (File.Exists(Path) == false)
+            {
+                Console.WriteLine($"{Path} не найдено");
+                throw new Exception($"{Path} file doesen't exists");
+            }
+
+            string json = File.ReadAllText(Path);
+            Answers = JsonConvert.DeserializeObject<Answers>(json);
+
+            LoadSuccessPrint();
+        }
+
+        public void LoadSuccessPrint()
+        {
+            Console.WriteLine($"Ответы бота из файла {Path} успешно загружены");
+        }
+    }
+
+    public class QuestionSettings : ISettings
+    {
+        public string Path { get; set; }
+        public ApplicationQuestions ApplicQuestions { get; private set; }
+
+        public QuestionSettings(string path)
+        {
+            Path = path;
+        }
+        public void LoadSettings()
+        {
+            if (File.Exists(Path) == false)
+            {
+                Console.WriteLine($"{Path} не найдено");
+                throw new Exception($"{Path} file doesen't exists");
+            }
+
+            string json = File.ReadAllText(Path);
+            ApplicQuestions = JsonConvert.DeserializeObject<ApplicationQuestions>(json);
+
+            LoadSuccessPrint();
+        }
+
+        public void LoadSuccessPrint()
+        {
+            Console.WriteLine($"Вопросы заявки из файла {Path} успешно загружены");
         }
     }
 }
