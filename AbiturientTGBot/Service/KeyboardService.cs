@@ -85,22 +85,6 @@ namespace AbiturientTGBot.Service
                 specIndex++;
             }
 
-            //KeyboardButton[] buttons = new KeyboardButton[specializations.Length];
-
-
-            //for (int i = 0; i < buttons.Length; i++)
-            //{
-            //    buttons[i] = new KeyboardButton(specializations[i].Qualification);
-            //}
-
-            //BaseSpecKeyboard = new ReplyKeyboardMarkup(new[] { new KeyboardButton[] { "" } });
-
-            //for (int i = 0; i < specializations.Length; i++)
-            //{
-            //    IEnumerable<KeyboardButton> element = new KeyboardButton[] { buttons[i].Text }; /*(IEnumerable<KeyboardButton>)buttons[i];*/
-            //    BaseSpecKeyboard.Keyboard.Append(element);
-            //}
-
 
             BaseSpecKeyboard = new ReplyKeyboardMarkup(new[]
             {
@@ -114,35 +98,57 @@ namespace AbiturientTGBot.Service
 
         private void CreateSpecKeyboard()
         {
-            Specialization[] specializations = db.GetSpecializations();
-            KeyboardButton[] buttons = new KeyboardButton[specializations.Length];
+            KeyboardButton[] firstRow;
+            KeyboardButton[] secondRow;
+
+            Specialization[] specializations = new Specialization[db.GetSpecializationsCount()];
+
+            int firstLength = specializations.Count() / 2;
+            int secondLength = specializations.Count() - firstLength;
+            int specIndex = 0;
+
+            Specialization[] baseSpecs = db.GetBaseSpecializations();
+            Specialization[] midSpecs = db.GetMidSpecializations();
+
+            firstRow = new KeyboardButton[baseSpecs.Length];
+            secondRow = new KeyboardButton[midSpecs.Length];
+
+
+            int startIndex = 0;
+            for (int i = 0; i < baseSpecs.Length; i++)
+            {
+                specializations[i] = baseSpecs[i];
+                startIndex++;
+            }
+
+            for (int i = 0; i < midSpecs.Length; i++)
+            {
+                specializations[startIndex] = midSpecs[i];
+                startIndex++;
+            }
+
+            firstRow = new KeyboardButton[firstLength];
+            for (int i = 0; i < firstRow.Length; i++)
+            {
+                firstRow[i] = new KeyboardButton(specializations[i].Qualification + " на базе " + specializations[i].ClassRequired + " классов");
+                specIndex = i;
+            }
+
+            specIndex++;
+            secondRow = new KeyboardButton[secondLength];
+            for (int i = 0; i < secondRow.Length; i++)
+            {
+                secondRow[i] = new KeyboardButton(specializations[specIndex].Qualification + " на базе " + specializations[specIndex].ClassRequired + " классов");
+                specIndex++;
+            }
 
             SpecialityKeyboard = new ReplyKeyboardMarkup(new[]
             {
-                new KeyboardButton[] { specializations[0].Qualification + " после " + specializations[0].ClassRequired + " Классов"},
-                new KeyboardButton[] { specializations[1].Qualification + " после " + specializations[1].ClassRequired + " Классов"},
-                new KeyboardButton[] { specializations[2].Qualification + " после " + specializations[2].ClassRequired + " Классов"},
-                new KeyboardButton[] { specializations[3].Qualification + " после " + specializations[3].ClassRequired + " Классов"},
-                new KeyboardButton[] { specializations[4].Qualification + " после " + specializations[4].ClassRequired + " Классов"},
-                new KeyboardButton[] { specializations[5].Qualification + " после " + specializations[5].ClassRequired + " Классов"},
+                firstRow,
+                secondRow
             });
             SpecialityKeyboard.ResizeKeyboard = true;
 
-            //KeyboardButton[] buttons = new KeyboardButton[Specializations.Length];
-
-            //for (int i = 0; i < buttons.Length; i++)
-            //{
-            //    buttons[i] = new KeyboardButton(Specializations[i].Name);
-            //}
-
-            //SpecialityKeyboard = new ReplyKeyboardMarkup(new[]
-            //{
-            //    new KeyboardButton[] { Specializations[0].Qualification },
-            //    new KeyboardButton[] { Specializations[1].Qualification },
-            //    new KeyboardButton[] { Specializations[2].Qualification },
-            //    new KeyboardButton[] { Specializations[3].Qualification },
-            //});
-            //SpecialityKeyboard.ResizeKeyboard = true;
             SpecialityKeyboard.InputFieldPlaceholder = "Для просмотра доп. информации нажми одну из кнопок";
         }
 

@@ -74,6 +74,11 @@ namespace AbiturientTGBot.Service
 
         // Code with specializations
 
+        public int GetSpecializationsCount()
+        {
+            return db.Specializations.Count();
+        }
+
         public Specialization[] GetSpecializations()
         {
             return db.Specializations.ToArray();
@@ -99,6 +104,19 @@ namespace AbiturientTGBot.Service
             //return db.Specializations.Where(s => s.Qualification == specQualification)
             //    .Where(s => s.ClassRequired == classReq)
             //    .Select(s => s.Name).First();
+        }
+
+        public string GetSpecInfo(string userMsg)
+        {
+            string[] words = userMsg.Split(' ');
+
+            int classReq = Convert.ToInt32(words[3]);
+            string spec = words[0];
+
+            Specialization specialization = db.Specializations.Where(s => s.ClassRequired == classReq)
+                .Where(s => s.Qualification == spec).First();
+
+            return msgService.CreateInfoMessage(specialization);
         }
     }
 }
