@@ -9,22 +9,28 @@ namespace AbiturientTGBot
     {
         static void Main(string[] args)
         {
-            BotSettings botSettings = new BotSettings();
+            BotSettings botSettings = new BotSettings(
+                cfgPath: @"Settings\Bot.cfg",
+                answersPath: @"Settings\QA\Answers.json",
+                appQuestionsPath: @"Settings\QA\Application_questions.json");
+
             botSettings.LoadSettings();
 
             KeyboardService keyboardService = new KeyboardService();
+            DBService dbService = new DBService();
 
-            BotService service = new BotService(botSettings.Token, keyboardService);
-            ITelegramBotClient bot = service.CreateBot();
+            BotService botService = new BotService(botSettings, keyboardService, dbService);
+
+            ITelegramBotClient bot = botService.CreateBot();
 
             bot.StartReceiving(
-                service.HandleUpdateAsync,
-                service.HandleErrorAsync,
-                service.ReceiverOptions,
-                service.CancellationToken
+                botService.HandleUpdateAsync,
+                botService.HandleErrorAsync,
+                botService.ReceiverOptions,
+                botService.CancellationToken
             );
 
-            Console.WriteLine("Запущен бот " + bot.GetMeAsync().Result.FirstName);
+            Console.WriteLine($"Бот {bot.GetMeAsync().Result.Username} запущен");
 
             Console.ReadLine();
         }
