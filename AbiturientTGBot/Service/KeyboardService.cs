@@ -10,20 +10,84 @@ namespace AbiturientTGBot.Service
         // Data base code
         DBService db = new DBService();
 
+        // Reply keyboards
         public ReplyKeyboardMarkup SpecialityKeyboard { get; private set; }
         public ReplyKeyboardMarkup ClassKeyboard { get; private set; }
         public ReplyKeyboardMarkup BaseSpecKeyboard { get; private set; }
         public ReplyKeyboardMarkup MidSpecKeyboard { get; private set; }
+        public ReplyKeyboardMarkup TestKeyboard { get; private set; }
+        public ReplyKeyboardMarkup IsMaleKeyboard { get; private set; }
+        public ReplyKeyboardMarkup YesNoKeyboard { get; private set; }
+        public ReplyKeyboardMarkup InvalidGroupKeyboard { get; private set; }
+
+        // Next button
+        private KeyboardButton[] NextButton = new KeyboardButton[] { "Далее" };
 
         public KeyboardService()
         {
-            CreateSpecKeyboard();
-            CreateClassKeyboard();
-            CreateBaseSpecKeyboard();
-            CreateMidSpecKeyboard();
+            SpecialityKeyboard = CreateSpecKeyboard();
+            ClassKeyboard = CreateClassKeyboard();
+            BaseSpecKeyboard = CreateBaseSpecKeyboard();
+            MidSpecKeyboard = CreateMidSpecKeyboard();
+            TestKeyboard = CreateTestKeyboard();
+            IsMaleKeyboard = CreateIsMaleKeyboard();
+            YesNoKeyboard = CreateYesNoKeyboard();
+            InvalidGroupKeyboard = CreateInvalidGroupKeyboard();
         }
 
-        private void CreateMidSpecKeyboard()
+        private ReplyKeyboardMarkup CreateInvalidGroupKeyboard()
+        {
+            ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup(new[]
+            {       
+                new KeyboardButton[] {"Нет инвалидности"},
+                new KeyboardButton[] {"1", "2", "3"},
+            });
+
+            keyboard.ResizeKeyboard = true;
+
+            return keyboard;
+        }
+
+        private ReplyKeyboardMarkup CreateYesNoKeyboard()
+        {
+            ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup(new[]
+{
+                new KeyboardButton[] {"Да"},
+                new KeyboardButton[] {"Нет"}
+            });
+
+            keyboard.ResizeKeyboard = true;
+
+            return keyboard;
+        }
+
+        private ReplyKeyboardMarkup CreateIsMaleKeyboard()
+        {
+            ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup(new[]
+{
+                new KeyboardButton[] {"Мужской"},
+                new KeyboardButton[] {"Женский"}
+            });
+
+            keyboard.ResizeKeyboard = true;
+
+            return keyboard;
+        }
+
+        private ReplyKeyboardMarkup CreateTestKeyboard()
+        {
+            ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup(new[]
+            {
+                new KeyboardButton[] {"Тест проф. ориентации"},
+                new KeyboardButton[] {"Заполнить заявку"}
+            });
+
+            keyboard.ResizeKeyboard = true;
+
+            return keyboard;
+        }
+
+        private ReplyKeyboardMarkup CreateMidSpecKeyboard()
         {
             // разделение на 2 строки половина кнопок в первую, половина во вторую
             KeyboardButton[] firstRow;
@@ -49,17 +113,20 @@ namespace AbiturientTGBot.Service
                 specIndex++;
             }
 
-            MidSpecKeyboard = new ReplyKeyboardMarkup(new[]
+            ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup(new[]
             {
                 firstRow,
-                secondRow
+                secondRow,
+                NextButton
             });
 
-            MidSpecKeyboard.ResizeKeyboard = true;
-            MidSpecKeyboard.InputFieldPlaceholder = "Для просмотра доп. информации нажми одну из кнопок";
+            keyboard.ResizeKeyboard = true;
+            keyboard.InputFieldPlaceholder = "Для просмотра доп. информации нажми одну из кнопок";
+
+            return keyboard;
         }
 
-        private void CreateBaseSpecKeyboard()
+        private ReplyKeyboardMarkup CreateBaseSpecKeyboard()
         {
             // разделение на 2 строки половина кнопок в первую, половина во вторую
             KeyboardButton[] firstRow;
@@ -86,17 +153,20 @@ namespace AbiturientTGBot.Service
             }
 
 
-            BaseSpecKeyboard = new ReplyKeyboardMarkup(new[]
+            ReplyKeyboardMarkup keyboard= new ReplyKeyboardMarkup(new[]
             {
                 firstRow,
-                secondRow
+                secondRow,
+                NextButton
             });
 
-            BaseSpecKeyboard.ResizeKeyboard = true;
-            BaseSpecKeyboard.InputFieldPlaceholder = "Для просмотра доп. информации нажми одну из кнопок";
+            keyboard.ResizeKeyboard = true;
+            keyboard.InputFieldPlaceholder = "Для просмотра доп. информации нажми одну из кнопок";
+
+            return keyboard;
         }
 
-        private void CreateSpecKeyboard()
+        private ReplyKeyboardMarkup CreateSpecKeyboard()
         {
             KeyboardButton[] firstRow;
             KeyboardButton[] secondRow;
@@ -142,24 +212,29 @@ namespace AbiturientTGBot.Service
                 specIndex++;
             }
 
-            SpecialityKeyboard = new ReplyKeyboardMarkup(new[]
+            ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup(new[]
             {
                 firstRow,
-                secondRow
+                secondRow,
+                NextButton
             });
-            SpecialityKeyboard.ResizeKeyboard = true;
+            keyboard.ResizeKeyboard = true;
 
-            SpecialityKeyboard.InputFieldPlaceholder = "Для просмотра доп. информации нажми одну из кнопок";
+            keyboard.InputFieldPlaceholder = "Для просмотра доп. информации нажми одну из кнопок";
+
+            return keyboard;
         }
 
-        private void CreateClassKeyboard()
+        private ReplyKeyboardMarkup CreateClassKeyboard()
         {
-            ClassKeyboard = new ReplyKeyboardMarkup(new []
+            ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup(new []
             {
                 new KeyboardButton[] {"После 9-ого", "После 11-ого"},
                 new KeyboardButton[] {"Показать все специальности"}
             });
-            ClassKeyboard.ResizeKeyboard = true;
+            keyboard.ResizeKeyboard = true;
+
+            return keyboard;
         }
 
         public void Save()
