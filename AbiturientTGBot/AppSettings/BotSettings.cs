@@ -1,4 +1,5 @@
 ﻿using AbiturientTGBot.Bot_QA;
+using AbiturientTGBot.Service;
 using Newtonsoft.Json;
 
 namespace AbiturientTGBot.AppSettings
@@ -8,6 +9,8 @@ namespace AbiturientTGBot.AppSettings
         public string CfgPath { get; set; }
         public string AnswersPath { get; set; }
         public string AppQuestionsPath { get; set; }
+        public KeyboardService KeyboardService { get; set; }
+        public DBService DBService { get; set; }
 
         public string? Token { get; private set; }
         public Answers Answers { get; private set; }
@@ -18,11 +21,14 @@ namespace AbiturientTGBot.AppSettings
         private QuestionSettings questionSet;
 
 
-        public BotSettings(string cfgPath, string answersPath, string appQuestionsPath)
+        public BotSettings(string cfgPath, string answersPath, string appQuestionsPath, KeyboardService keyboard, DBService dbService)
         {
             CfgPath = cfgPath;
             AnswersPath = answersPath;
             AppQuestionsPath = appQuestionsPath;
+
+            this.KeyboardService = keyboard;
+            this.DBService = dbService;
 
             tokenSet = new TokenSettings(CfgPath);
             answerSet = new AnswerSettings(AnswersPath);
