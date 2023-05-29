@@ -1,5 +1,6 @@
 ﻿using AbiturientTGBot.AppSettings;
 using AbiturientTGBot.Bot_QA;
+using AbiturientTGBot.Handlers;
 using Newtonsoft.Json;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
@@ -17,11 +18,14 @@ namespace AbiturientTGBot.Service
         public Answers Answers { get; private set; }
 
         // Services
-        DBService db;
-        KeyboardService keyboard;
+        public DBService db { get; private set; }
+        public KeyboardService keyboard { get; private set; }
+
+        // Bot settings
+        public BotSettings settings { get; private set; }
 
 
-        public BotService(BotSettings botSettings, KeyboardService keyboardService, DBService dBService)
+        public BotService(BotSettings botSettings)
         {
             this.Cts = new CancellationTokenSource();
             this.CancellationToken = Cts.Token;
@@ -32,17 +36,23 @@ namespace AbiturientTGBot.Service
 
             BotToken = botSettings.Token;
             Answers = botSettings.Answers;
-            db = dBService;
+            db = botSettings.DBService;
+            keyboard = botSettings.KeyboardService;
 
-            keyboard = keyboardService;
+            settings = botSettings;
         }
 
         public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
-            // If message from bot exit function
+            // If update doesn't contain message it exists
+            if (update.Message == null)
+                return;
+
+            // If message from bot it exits 
             if (update.Message.From.IsBot == true)
                 return;
 
+            await Console.Out.WriteLineAsync("");
             Console.WriteLine(JsonConvert.SerializeObject(update));
             if (update.Type == Telegram.Bot.Types.Enums.UpdateType.Message)
             {
@@ -56,13 +66,30 @@ namespace AbiturientTGBot.Service
                     // Sets to user start state
                     db.SetUserState(userId, "newUser");
 
-                    //ReplyKeyboardMarkup keyboard = msg.CreateKeyboard(keys);
-
                     await botClient.SendTextMessageAsync(message.Chat,
                         text: Answers.StartMessage,
                         replyMarkup: keyboard.ClassKeyboard);
 
                     return;
+                }
+
+                if (message.Text.ToLower() == "далее")
+                {
+                    db.SetUserState(userId, "testSelect");
+
+                    await botClient.SendTextMessageAsync(message.Chat,
+                        text: Answers.NewApplicationSuggest,
+                        replyMarkup: keyboard.TestKeyboard);
+                }
+
+                if (message.Text.ToLower() == "заполнить заявку")
+                {
+                    db.SetUserState(userId, "newApplication");
+                }
+
+                if (message.Text.ToLower() == "тест проф. ориентации")
+                {
+                    db.SetUserState(userId, "profTest");
                 }
 
                 string userState = db.GetUserState(userId);
@@ -107,7 +134,7 @@ namespace AbiturientTGBot.Service
 
                             db.SetUserState(userId, newUserState);
                         }
-                        break;
+                    break;
 
                     case "After9":
                         {
@@ -125,7 +152,7 @@ namespace AbiturientTGBot.Service
                                  text: specInfo);
                             
                         }
-                        break;
+                    break;
 
                     case "After11":
                         {
@@ -142,7 +169,7 @@ namespace AbiturientTGBot.Service
                             await botClient.SendTextMessageAsync(message.Chat,
                                  text: specInfo);
                         }
-                        break;
+                    break;
 
                     case "AllSpec":
                         {
@@ -150,6 +177,7 @@ namespace AbiturientTGBot.Service
                             try
                             {
                                 specInfo = db.GetSpecInfo(update.Message.Text);
+
                             }
                             catch (Exception ex)
                             {
@@ -159,8 +187,20 @@ namespace AbiturientTGBot.Service
                             await botClient.SendTextMessageAsync(message.Chat,
                                  text: specInfo);
                         }
-                        break;
+                    break;
 
+                    case "newApplication":
+                        {
+                            ApplicationHandler handler = new ApplicationHandler(this, userId, message.Text);
+                            MessageHandle messageHandle = handler.Handle();
+
+                            await botClient.SendTextMessageAsync(message.Chat,
+                                text: messageHandle.Message,
+                                replyMarkup: messageHandle.ReplyKeyboard);
+                        }
+                    break;
+
+                                            
                 }
             }
         }
