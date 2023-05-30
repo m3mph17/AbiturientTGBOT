@@ -10,11 +10,15 @@ namespace AbiturientTGBot.Models
     {
         public int AbiturientId { get; set; }
         public int UserId { get; set; }
+        public int? SpecId { get; set; }
         public bool IsFull { get; set; }
         public string? Surname { get; set; }
         public string? Firstname { get; set; }
         public string? Patronymic { get; set; }
         public string? Address { get; set; }
+        public string? SchoolName { get; set; }
+        public string? SchoolAddress { get; set; }
+        public double? SchoolMark { get; set; }
         public bool? IsMale { get; set; }
         public bool? IsOrphan { get; set; }
         public bool? IsManyChildren { get; set; }
