@@ -134,6 +134,19 @@ namespace AbiturientTGBot.Service
             return msgService.CreateInfoMessage(specialization);
         }
 
+        public Specialization GetSpecizalization(string userMsg)
+        {
+            string[] words = userMsg.Split(' ');
+
+            int classReq = Convert.ToInt32(words[3]);
+            string spec = words[0];
+
+            Specialization specialization = db.Specializations.Where(s => s.ClassRequired == classReq)
+                .Where(s => s.Qualification == spec).First();
+
+            return specialization;
+        }
+
         // Abiturient info
 
         public bool IsNewAbiturient(int id)
