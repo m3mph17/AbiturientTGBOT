@@ -15,18 +15,56 @@ namespace AbiturientTGBot.Service
         public string CreateInfoMessage(Specialization specialization)
         {
             string msg =
-                $"Название специальности: {specialization.Name}\n" +
-                $"Прошлое название: {specialization.PrevName}\n" +
-                $"Квалификация: {specialization.Qualification}\n" +
-                $"Срок обучения: {specialization.StudyTime}\n" +
+                $"Название специальности:\n{specialization.Name}\n" +
+                $"Прошлое название:\n{specialization.PrevName}\n\n" +
+                $"Квалификация: {specialization.Qualification}\n\n" +
+                $"Срок обучения: {specialization.StudyTime}\n\n" +
                 //specialization.PrevPassScore == 0 ? ("") : ("")
-                $"Проходной балл в прошлом году: {specialization.PrevPassScore}\n" +
+                $"Проходной балл в прошлом году: {specialization.PrevPassScore}\n\n" +
                 $"Планируемый набор (платно): {specialization.StudentsAmount}\n" +
                 $"Планируемый набор (бюджет): {specialization.FreeStudentsAmount}";
 
 
             if (String.IsNullOrEmpty(specialization.AddInfo) == false)
-                msg += $"\n\nДоп. информация: {specialization.AddInfo}";
+                msg += $"\n\nДоп. информация:\n {specialization.AddInfo}";
+
+            return msg;
+        }
+
+        public string CreateSocialInfo(Abiturient abiturient)
+        {
+            // ❌ ✅
+            string msg = string.Empty;
+            msg += "Многодетная ";
+
+            if (abiturient.IsManyChildren == true)
+                msg += "✅\n";
+            else
+                msg += "❌\n";
+
+            msg += "Сирота ";
+            if (abiturient.IsOrphan == true)
+                msg += "✅\n";
+            else
+                msg += "❌\n";
+
+            msg += "Чернобыль ";
+            if (abiturient.IsFromChernobyl == true)
+                msg += "✅\n";
+            else
+                msg += "❌\n";
+
+            msg += "Хостел ";
+            if (abiturient.IsNeedHostel == true)
+                msg += "✅\n";
+            else
+                msg += "❌\n";
+
+            msg += "ОПФР ";
+            if (abiturient.IsOpfr == true)
+                msg += "✅\n";
+            else
+                msg += "❌\n";
 
             return msg;
         }

@@ -13,13 +13,23 @@ namespace AbiturientTGBot.Service
         MessageService msgService = new MessageService();
 
         // Code with users
-        public async void SetUserState(long id, string state)
+
+        public void SetUserStateByTableId(int id, string state)
+        {
+            User user = db.Users.Where(u => u.Id == id).First();
+            user.State = state;
+
+            db.Users.Update(user);
+            db.SaveChanges();
+        }
+
+        public void SetUserState(long id, string state)
         {
             User user = db.Users.Where(u => u.UserId == id).First();
             user.State = state;
 
             db.Users.Update(user);
-            await db.SaveChangesAsync();
+            db.SaveChanges();
         }
 
         public bool IsNewUser(long id)
@@ -37,7 +47,7 @@ namespace AbiturientTGBot.Service
             return false;
         }
 
-        public async void InsertNewUser(long id, string username)
+        public void InsertNewUser(long id, string username)
         {
             if (IsNewUser(id) == false)
             {
@@ -52,7 +62,7 @@ namespace AbiturientTGBot.Service
             };
 
             db.Users.Add(newUser);
-            await db.SaveChangesAsync();
+            db.SaveChanges();
         }
 
         public string GetUserState(long id)
@@ -70,6 +80,11 @@ namespace AbiturientTGBot.Service
                 .First();
 
             return state;
+        }
+
+        public User GetUser(long id)
+        {
+            return db.Users.Where(u => u.UserId == id).First();
         }
 
         // Code with specializations
@@ -117,6 +132,60 @@ namespace AbiturientTGBot.Service
                 .Where(s => s.Qualification == spec).First();
 
             return msgService.CreateInfoMessage(specialization);
+        }
+
+        public Specialization GetSpecizalization(string userMsg)
+        {
+            string[] words = userMsg.Split(' ');
+
+            int classReq = Convert.ToInt32(words[3]);
+            string spec = words[0];
+
+            Specialization specialization = db.Specializations.Where(s => s.ClassRequired == classReq)
+                .Where(s => s.Qualification == spec).First();
+
+            return specialization;
+        }
+
+        // Abiturient info
+
+        public bool IsNewAbiturient(int id)
+        {
+            try
+            {
+                db.Abiturients.Where(a => a.UserId == id).First();
+            }
+            catch (Exception ex)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public void CreateNewAbiturient(Abiturient abiturient)
+        {
+            if (IsNewAbiturient(abiturient.UserId) == false)
+                return;
+
+            db.Abiturients.Add(abiturient);
+            db.SaveChanges();
+        }
+        public void UpdateAbiturient(Abiturient abiturient)
+        {
+            db.Abiturients.Update(abiturient);
+            db.SaveChanges();
+        }
+        public Abiturient GetAbiturient(int id)
+        {
+            try
+            {
+                return db.Abiturients.Where(a => a.UserId == id).First();
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
         }
     }
 }

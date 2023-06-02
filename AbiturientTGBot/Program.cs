@@ -9,17 +9,20 @@ namespace AbiturientTGBot
     {
         static void Main(string[] args)
         {
-            BotSettings botSettings = new BotSettings(
-                cfgPath: @"Settings\Bot.cfg",
-                answersPath: @"Settings\QA\Answers.json",
-                appQuestionsPath: @"Settings\QA\Application_questions.json");
-
-            botSettings.LoadSettings();
-
             KeyboardService keyboardService = new KeyboardService();
             DBService dbService = new DBService();
 
-            BotService botService = new BotService(botSettings, keyboardService, dbService);
+            BotSettings botSettings = new BotSettings(
+                cfgPath: @"Settings\Bot.cfg",
+                answersPath: @"Settings\QA\Answers.json",
+                appQuestionsPath: @"Settings\QA\Application_questions.json",
+                keyboard: keyboardService,
+                dbService: dbService);
+
+            botSettings.LoadSettings();
+
+
+            BotService botService = new BotService(botSettings);
 
             ITelegramBotClient bot = botService.CreateBot();
 

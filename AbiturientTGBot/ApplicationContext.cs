@@ -13,6 +13,7 @@ namespace AbiturientTGBot
         // Tables of data base
         public DbSet<User> Users { get; set; } = null!;
         public DbSet<Specialization> Specializations { get; set; } = null!;
+        public DbSet<Abiturient> Abiturients { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
