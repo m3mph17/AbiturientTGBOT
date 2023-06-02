@@ -1,7 +1,7 @@
 ﻿using AbiturientTGBot.Models;
 using Newtonsoft.Json;
-using System;
 using Telegram.Bot.Types.ReplyMarkups;
+using InlineKeyboardMarkup = Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup;
 
 namespace AbiturientTGBot.Service
 {
@@ -23,6 +23,13 @@ namespace AbiturientTGBot.Service
         // Next button
         private KeyboardButton[] NextButton = new KeyboardButton[] { "Далее" };
 
+        // Inline keyboards
+        public InlineKeyboardMarkup SocialInlineKeyboard { get; private set; }
+
+        // Inline buttons
+        public InlineKeyboardButton[][] socialButtons { get; private set; }
+
+
         public KeyboardService()
         {
             SpecialityKeyboard = CreateSpecKeyboard();
@@ -33,12 +40,114 @@ namespace AbiturientTGBot.Service
             IsMaleKeyboard = CreateIsMaleKeyboard();
             YesNoKeyboard = CreateYesNoKeyboard();
             InvalidGroupKeyboard = CreateInvalidGroupKeyboard();
+            SocialInlineKeyboard = CreateSocialInlineKeyboard();
+            socialButtons = CreateSocialButtons();
+        }
+
+        public InlineKeyboardMarkup CreateInlineKeyboard(InlineKeyboardButton[] buttons)
+        {
+            InlineKeyboardButton[] row1 = new InlineKeyboardButton[] { buttons[0], buttons[1] };
+            InlineKeyboardMarkup keyboard = new InlineKeyboardMarkup(row1);
+
+            return keyboard;
+        }
+
+        private InlineKeyboardButton[][] CreateSocialButtons()
+        {
+            InlineKeyboardButton[] isManyChildren = new InlineKeyboardButton[]
+            {
+                new InlineKeyboardButton("Многодетная ❌")
+            };
+            isManyChildren[0].CallbackData = "manyChildrenTrue";
+
+            InlineKeyboardButton[] isOrphan = new InlineKeyboardButton[]
+            {
+                new InlineKeyboardButton("Сирота ❌")
+            };
+            isOrphan[0].CallbackData = "orphanTrue";
+
+            InlineKeyboardButton[] isChernobyl = new InlineKeyboardButton[]
+            {
+                new InlineKeyboardButton("Чернобыль ❌")
+            };
+            isChernobyl[0].CallbackData = "chernobylTrue";
+
+            InlineKeyboardButton[] isHostel = new InlineKeyboardButton[]
+            {
+                new InlineKeyboardButton("Хостел ❌")
+            };
+            isHostel[0].CallbackData = "hostelTrue";
+
+            InlineKeyboardButton[] isOpfr = new InlineKeyboardButton[]
+            {
+                new InlineKeyboardButton("ОПФР ❌")
+            };
+            isOpfr[0].CallbackData = "opfrTrue";
+
+            InlineKeyboardButton[] submit = new InlineKeyboardButton[]
+            {
+                new InlineKeyboardButton("Подтвердить информацию")
+            };
+            submit[0].CallbackData = "submitData";
+
+            InlineKeyboardButton[][] keyboardButtons = new InlineKeyboardButton[][]
+            { isManyChildren, isOrphan, isChernobyl, isHostel, isOpfr, submit };
+
+            return keyboardButtons;
+        }
+
+        private InlineKeyboardMarkup CreateSocialInlineKeyboard()
+        {
+            // ❌ ✅
+
+            InlineKeyboardButton[] isManyChildren = new InlineKeyboardButton[]
+            {
+                new InlineKeyboardButton("Многодетная ❌")
+            };
+            isManyChildren[0].CallbackData = "manyChildrenTrue";
+
+            InlineKeyboardButton[] isOrphan = new InlineKeyboardButton[]
+            {
+                new InlineKeyboardButton("Сирота ❌")
+            };
+            isOrphan[0].CallbackData = "orphanTrue";
+
+            InlineKeyboardButton[] isChernobyl = new InlineKeyboardButton[]
+            {
+                new InlineKeyboardButton("Чернобыль ❌")
+            };
+            isChernobyl[0].CallbackData = "chernobylTrue";
+
+            InlineKeyboardButton[] isHostel = new InlineKeyboardButton[]
+            {
+                new InlineKeyboardButton("Хостел ❌")
+            };
+            isHostel[0].CallbackData = "hostelTrue";
+
+            InlineKeyboardButton[] isOpfr = new InlineKeyboardButton[]
+            {
+                new InlineKeyboardButton("ОПФР ❌")
+            };
+            isOpfr[0].CallbackData = "opfrTrue";
+
+            InlineKeyboardButton[] submit = new InlineKeyboardButton[]
+            {
+                new InlineKeyboardButton("Подтвердить информацию")
+            };
+            submit[0].CallbackData = "submitData";
+
+            InlineKeyboardButton[][] buttons = new InlineKeyboardButton[][]
+            { isManyChildren, isOrphan, isChernobyl, isHostel, isOpfr, submit};
+
+            InlineKeyboardMarkup keyboard = new InlineKeyboardMarkup(buttons);
+
+            return keyboard;
         }
 
         private ReplyKeyboardMarkup CreateInvalidGroupKeyboard()
         {
             ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup(new[]
-            {       
+            {
                 new KeyboardButton[] {"Нет инвалидности"},
                 new KeyboardButton[] {"1", "2", "3"},
             });
@@ -133,7 +242,7 @@ namespace AbiturientTGBot.Service
             KeyboardButton[] secondRow;
 
             Specialization[] specializations = db.GetBaseSpecializations();
-            int firstLength = specializations.Count() / 2; 
+            int firstLength = specializations.Count() / 2;
             int secondLength = specializations.Count() - firstLength;
             int specIndex = 0;
 
@@ -153,7 +262,7 @@ namespace AbiturientTGBot.Service
             }
 
 
-            ReplyKeyboardMarkup keyboard= new ReplyKeyboardMarkup(new[]
+            ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup(new[]
             {
                 firstRow,
                 secondRow,
@@ -227,7 +336,7 @@ namespace AbiturientTGBot.Service
 
         private ReplyKeyboardMarkup CreateClassKeyboard()
         {
-            ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup(new []
+            ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup(new[]
             {
                 new KeyboardButton[] {"После 9-ого", "После 11-ого"},
                 new KeyboardButton[] {"Показать все специальности"}
@@ -336,11 +445,11 @@ namespace AbiturientTGBot.Service
 
             //specialityKeyboard.ResizeKeyboard = true;
 
-            foreach(Specialization specialization in specializations)
+            foreach (Specialization specialization in specializations)
             {
                 string json = JsonConvert.SerializeObject(specialization, Formatting.Indented);
                 //File.Create(@$"Specializations\{specialization.Qualification}" + "_" + specialization.ClassRequired + ".json");
-                File.AppendAllText(@$"Specializations\{specialization.Qualification}" + "_" + specialization.ClassRequired + ".json", json);
+                //File.AppendAllText(@$"Specializations\{specialization.Qualification}" + "_" + specialization.ClassRequired + ".json", json);
             }
 
             //string json = JsonConvert.SerializeObject(this);
