@@ -8,22 +8,29 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Telegram.Bot.Requests;
+using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
+using User = AbiturientTGBot.Models.User;
 
 namespace AbiturientTGBot.Handlers
 {
     public class ApplicationHandler
     {
         User user;
-        string message;
+        string? message;
+        CallbackQuery callback;
+
         BotService bot;
 
         // Services
         DBService db;
+        MessageService messageService = new MessageService();
         KeyboardService keyboard;
         ApplicationQuestions questions;
         Answers answers;
 
-        public ApplicationHandler(object sender, long userId, string message)
+        public ApplicationHandler(object sender, long userId, string? message)
         {
             bot = (BotService)sender;
             db = bot.db;
@@ -33,6 +40,140 @@ namespace AbiturientTGBot.Handlers
             this.message = message;
             questions = bot.settings.ApplicQuestions;
             answers = bot.settings.Answers;
+        }
+
+        public ApplicationHandler(object sender, long userId, CallbackQuery callback)
+        {
+            bot = (BotService)sender;
+            db = bot.db;
+            keyboard = bot.keyboard;
+            user = bot.db.GetUser(userId);
+
+            questions = bot.settings.ApplicQuestions;
+            answers = bot.settings.Answers;
+            this.callback = callback;
+        }
+
+        public MessageHandle HandleCallBack()
+        {
+            string data = callback.Data;
+            MessageHandle messageHandle = new MessageHandle { User = user };
+            Abiturient abiturient = db.GetAbiturient(user.Id);
+
+            InlineKeyboardButton[][] socialButtons = keyboard.socialButtons;
+
+            if (data == "manyChildrenTrue" || data == "manyChildrenFalse")
+            {
+                InlineKeyboardButton newButton = ChangeButtonState(socialButtons[0][0]);
+                socialButtons[0][0] = newButton;
+
+                if (abiturient.IsManyChildren == false)
+                    abiturient.IsManyChildren = true;
+
+                if (abiturient.IsManyChildren == true)
+                    abiturient.IsManyChildren = false;
+
+                if (abiturient.IsManyChildren == null)
+                    abiturient.IsManyChildren = true;
+            }
+
+            if (data == "orphanFalse" || data == "orphanTrue")
+            {
+                InlineKeyboardButton newButton = ChangeButtonState(socialButtons[1][0]);
+                socialButtons[1][0] = newButton;
+
+                if (abiturient.IsOrphan == false)
+                    abiturient.IsOrphan = true;
+
+                if (abiturient.IsOrphan == true)
+                    abiturient.IsOrphan = false;
+
+                if (abiturient.IsOrphan == null)
+                    abiturient.IsOrphan = true;
+            }
+
+            if (data == "chernobylFalse" || data == "chernobylTrue")
+            {
+                InlineKeyboardButton newButton = ChangeButtonState(socialButtons[2][0]);
+                socialButtons[2][0] = newButton;
+
+                if (abiturient.IsFromChernobyl == false)
+                    abiturient.IsFromChernobyl = true;
+
+                if (abiturient.IsFromChernobyl == true)
+                    abiturient.IsFromChernobyl = false;
+
+                if (abiturient.IsFromChernobyl == null)
+                    abiturient.IsFromChernobyl = true;
+            }
+
+            if (data == "hostelFalse" || data == "hostelTrue")
+            {
+                InlineKeyboardButton newButton = ChangeButtonState(socialButtons[3][0]);
+                socialButtons[3][0] = newButton;
+
+                if (abiturient.IsNeedHostel == true)
+                    abiturient.IsNeedHostel = false;
+
+                if (abiturient.IsNeedHostel == false)
+                    abiturient.IsNeedHostel = true;
+
+                if (abiturient.IsNeedHostel == null)
+                    abiturient.IsNeedHostel = true;                
+            }
+
+            if (data == "opfrFalse" || data == "opfrTrue")
+            {
+                InlineKeyboardButton newButton = ChangeButtonState(socialButtons[4][0]);
+                socialButtons[4][0] = newButton;
+
+                if (abiturient.IsOpfr == true)
+                    abiturient.IsOpfr = false;
+
+                if (abiturient.IsOpfr == false)
+                    abiturient.IsOpfr = true;
+
+                if (abiturient.IsOpfr == null)
+                    abiturient.IsOpfr = true;
+                
+            }
+
+            if (data == "submitData")
+            {
+                string msg = 
+                    "Информация подтверждена.\nНиже предоставлены ваши ответы:\n\n" + 
+                    messageService.CreateSocialInfo(abiturient) +
+                    "\n\nСпасибо за заполнение заявки!";
+
+                messageHandle.Message = msg;
+                messageHandle.InlineKeyboard = null;
+
+                if (abiturient.IsManyChildren == null)
+                    abiturient.IsManyChildren = false;
+
+                if (abiturient.IsOrphan == null)
+                    abiturient.IsOrphan = false;
+
+                if (abiturient.IsFromChernobyl == null)
+                    abiturient.IsFromChernobyl = false;
+
+                if (abiturient.IsOpfr == null)
+                    abiturient.IsOpfr = false;
+
+                if (abiturient.IsNeedHostel == null)
+                    abiturient.IsNeedHostel = false;
+
+                abiturient.IsFull = true;
+                db.UpdateAbiturient(abiturient);
+
+                return messageHandle;
+            }
+
+            db.UpdateAbiturient(abiturient);
+            InlineKeyboardMarkup inlineKeyboard = new InlineKeyboardMarkup(socialButtons);
+            messageHandle.InlineKeyboard = inlineKeyboard;
+
+            return messageHandle;
         }
 
         public MessageHandle Handle()
@@ -252,121 +393,6 @@ namespace AbiturientTGBot.Handlers
                 abiturient.BirthDate = message;
                 db.UpdateAbiturient(abiturient);
 
-                messageHandle.Message = questions.IsOrphan;
-                messageHandle.ReplyKeyboard = keyboard.YesNoKeyboard;
-
-                return messageHandle;
-            }
-
-            if (abiturient.IsOrphan == null)
-            {
-                if (message.ToLower() == "да")
-                    abiturient.IsOrphan = true;
-                if (message.ToLower() == "нет")
-                    abiturient.IsOrphan = false;
-
-                if (message.ToLower() != "да" && message.ToLower() != "нет")
-                {
-                    messageHandle.Message = answers.BadYesNoInput;
-                    messageHandle.ReplyKeyboard = keyboard.YesNoKeyboard;
-
-                    return messageHandle;
-                }
-
-                db.UpdateAbiturient(abiturient);
-
-                messageHandle.Message = questions.IsChernobyl;
-                messageHandle.ReplyKeyboard = keyboard.YesNoKeyboard;
-
-                return messageHandle;
-            }
-
-            if (abiturient.IsFromChernobyl == null)
-            {
-                if (message.ToLower() == "да")
-                    abiturient.IsFromChernobyl = true;
-                if (message.ToLower() == "нет")
-                    abiturient.IsFromChernobyl = false;
-
-                if (message.ToLower() != "да" && message.ToLower() != "нет")
-                {
-                    messageHandle.Message = answers.BadYesNoInput;
-                    messageHandle.ReplyKeyboard = keyboard.YesNoKeyboard;
-
-                    return messageHandle;
-                }
-
-                db.UpdateAbiturient(abiturient);
-
-                messageHandle.Message = questions.IsManyChildren;
-                messageHandle.ReplyKeyboard = keyboard.YesNoKeyboard;
-
-                return messageHandle;
-            }
-
-            if (abiturient.IsManyChildren == null)
-            {
-                if (message.ToLower() == "да")
-                    abiturient.IsManyChildren = true;
-                if (message.ToLower() == "нет")
-                    abiturient.IsManyChildren = false;
-
-                if (message.ToLower() != "да" && message.ToLower() != "нет")
-                {
-                    messageHandle.Message = answers.BadYesNoInput;
-                    messageHandle.ReplyKeyboard = keyboard.YesNoKeyboard;
-
-                    return messageHandle;
-                }
-
-                db.UpdateAbiturient(abiturient);
-
-                messageHandle.Message = questions.IsOpfr;
-                messageHandle.ReplyKeyboard = keyboard.YesNoKeyboard;
-
-                return messageHandle;
-            }
-
-            if (abiturient.IsOpfr == null)
-            {
-                if (message.ToLower() == "да")
-                    abiturient.IsOpfr = true;
-                if (message.ToLower() == "нет")
-                    abiturient.IsOpfr = false;
-
-                if (message.ToLower() != "да" && message.ToLower() != "нет")
-                {
-                    messageHandle.Message = answers.BadYesNoInput;
-                    messageHandle.ReplyKeyboard = keyboard.YesNoKeyboard;
-
-                    return messageHandle;
-                }
-
-                db.UpdateAbiturient(abiturient);
-
-                messageHandle.Message = questions.IsHostel;
-                messageHandle.ReplyKeyboard = keyboard.YesNoKeyboard;
-
-                return messageHandle;
-            }
-
-            if (abiturient.IsNeedHostel == null)
-            {
-                if (message.ToLower() == "да")
-                    abiturient.IsNeedHostel = true;
-                if (message.ToLower() == "нет")
-                    abiturient.IsNeedHostel = false;
-
-                if (message.ToLower() != "да" && message.ToLower() != "нет")
-                {
-                    messageHandle.Message = answers.BadYesNoInput;
-                    messageHandle.ReplyKeyboard = keyboard.YesNoKeyboard;
-
-                    return messageHandle;
-                }
-
-                db.UpdateAbiturient(abiturient);
-
                 messageHandle.Message = questions.InvalidGroup;
                 messageHandle.ReplyKeyboard = keyboard.InvalidGroupKeyboard;
 
@@ -389,21 +415,178 @@ namespace AbiturientTGBot.Handlers
 
                     return messageHandle;
                 }
-                
-                abiturient.IsFull = true;
+
+                //abiturient.IsFull = true;
                 db.UpdateAbiturient(abiturient);
 
-                messageHandle.Message = answers.EndMessage;
-                messageHandle.ReplyKeyboard = null;
+                messageHandle.Message = questions.SocialStatus;
+                messageHandle.InlineKeyboard = keyboard.SocialInlineKeyboard;
 
-                db.SetUserStateByTableId(user.Id, "newUser");
+                //db.SetUserStateByTableId(user.Id, "newUser");
 
                 return messageHandle;
             }
 
+            // Change to multiply
+            if (abiturient.IsOrphan == null)
+            {
+
+                    
+                return messageHandle;
+            }
+
+            //if (abiturient.IsOrphan == null)
+            //{
+            //    if (message.ToLower() == "да")
+            //        abiturient.IsOrphan = true;
+            //    if (message.ToLower() == "нет")
+            //        abiturient.IsOrphan = false;
+
+            //    if (message.ToLower() != "да" && message.ToLower() != "нет")
+            //    {
+            //        messageHandle.Message = answers.BadYesNoInput;
+            //        messageHandle.ReplyKeyboard = keyboard.YesNoKeyboard;
+
+            //        return messageHandle;
+            //    }
+
+            //    db.UpdateAbiturient(abiturient);
+
+            //    messageHandle.Message = questions.IsChernobyl;
+            //    messageHandle.ReplyKeyboard = keyboard.YesNoKeyboard;
+
+            //    return messageHandle;
+            //}
+
+            //if (abiturient.IsFromChernobyl == null)
+            //{
+            //    if (message.ToLower() == "да")
+            //        abiturient.IsFromChernobyl = true;
+            //    if (message.ToLower() == "нет")
+            //        abiturient.IsFromChernobyl = false;
+
+            //    if (message.ToLower() != "да" && message.ToLower() != "нет")
+            //    {
+            //        messageHandle.Message = answers.BadYesNoInput;
+            //        messageHandle.ReplyKeyboard = keyboard.YesNoKeyboard;
+
+            //        return messageHandle;
+            //    }
+
+            //    db.UpdateAbiturient(abiturient);
+
+            //    messageHandle.Message = questions.IsManyChildren;
+            //    messageHandle.ReplyKeyboard = keyboard.YesNoKeyboard;
+
+            //    return messageHandle;
+            //}
+
+            //if (abiturient.IsManyChildren == null)
+            //{
+            //    if (message.ToLower() == "да")
+            //        abiturient.IsManyChildren = true;
+            //    if (message.ToLower() == "нет")
+            //        abiturient.IsManyChildren = false;
+
+            //    if (message.ToLower() != "да" && message.ToLower() != "нет")
+            //    {
+            //        messageHandle.Message = answers.BadYesNoInput;
+            //        messageHandle.ReplyKeyboard = keyboard.YesNoKeyboard;
+
+            //        return messageHandle;
+            //    }
+
+            //    db.UpdateAbiturient(abiturient);
+
+            //    messageHandle.Message = questions.IsOpfr;
+            //    messageHandle.ReplyKeyboard = keyboard.YesNoKeyboard;
+
+            //    return messageHandle;
+            //}
+
+            //if (abiturient.IsOpfr == null)
+            //{
+            //    if (message.ToLower() == "да")
+            //        abiturient.IsOpfr = true;
+            //    if (message.ToLower() == "нет")
+            //        abiturient.IsOpfr = false;
+
+            //    if (message.ToLower() != "да" && message.ToLower() != "нет")
+            //    {
+            //        messageHandle.Message = answers.BadYesNoInput;
+            //        messageHandle.ReplyKeyboard = keyboard.YesNoKeyboard;
+
+            //        return messageHandle;
+            //    }
+
+            //    db.UpdateAbiturient(abiturient);
+
+            //    messageHandle.Message = questions.IsHostel;
+            //    messageHandle.ReplyKeyboard = keyboard.YesNoKeyboard;
+
+            //    return messageHandle;
+            //}
+
+            //if (abiturient.IsNeedHostel == null)
+            //{
+            //    if (message.ToLower() == "да")
+            //        abiturient.IsNeedHostel = true;
+            //    if (message.ToLower() == "нет")
+            //        abiturient.IsNeedHostel = false;
+
+            //    if (message.ToLower() != "да" && message.ToLower() != "нет")
+            //    {
+            //        messageHandle.Message = answers.BadYesNoInput;
+            //        messageHandle.ReplyKeyboard = keyboard.YesNoKeyboard;
+
+            //        return messageHandle;
+            //    }
+
+            //    db.UpdateAbiturient(abiturient);
+
+            //    messageHandle.Message = questions.InvalidGroup;
+            //    messageHandle.ReplyKeyboard = keyboard.InvalidGroupKeyboard;
+
+            //    return messageHandle;
+            //}
+
             messageHandle.Message = answers.EndMessage;
             messageHandle.ReplyKeyboard = null;
             return messageHandle;
+        }
+
+        private InlineKeyboardButton ChangeButtonState(InlineKeyboardButton button)
+        {
+            string text = button.Text;
+
+            // Changing text emoji to checkmark or cross
+            if (text[text.Length - 1] == '✅')
+            {
+                text = text.Substring(0, text.Length - 1) + "❌";
+            }
+            else
+            {
+                text = text.Substring(0, text.Length - 1) + "✅";
+            }
+
+            // Changing callback to true or false
+            string callback = button.CallbackData;
+
+            int trueIndex = callback.IndexOf("True");
+
+            if (trueIndex != -1)
+            {
+                callback = callback.Replace("False", "True");
+            }
+            else
+            {
+                callback = callback.Replace("True", "False");
+            }
+
+            InlineKeyboardButton newButton = new InlineKeyboardButton(text);
+            newButton.CallbackData = callback;
+
+            return newButton;
         }
     }
 }
