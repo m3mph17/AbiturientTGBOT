@@ -19,12 +19,7 @@ namespace AbiturientTGBot.Bot_QA
         public string Birthday { get; set; }
         public string HomeNumber { get; set; }
         public string PhoneNumber { get; set; }
-        public string IsManyChildren { get; set; }
-        public string IsOrphan { get; set; }
-        public string IsOpfr { get; set; }
+        public string SocialStatus { get; set; }
         public string InvalidGroup { get; set; }
-        public string IsChernobyl { get; set; }
-        public string IsHostel { get; set; }
-
     }
 }
