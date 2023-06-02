@@ -30,5 +30,43 @@ namespace AbiturientTGBot.Service
 
             return msg;
         }
+
+        public string CreateSocialInfo(Abiturient abiturient)
+        {
+            // ❌ ✅
+            string msg = string.Empty;
+            msg += "Многодетная ";
+
+            if (abiturient.IsManyChildren == true)
+                msg += "✅\n";
+            else
+                msg += "❌\n";
+
+            msg += "Сирота ";
+            if (abiturient.IsOrphan == true)
+                msg += "✅\n";
+            else
+                msg += "❌\n";
+
+            msg += "Чернобыль ";
+            if (abiturient.IsFromChernobyl == true)
+                msg += "✅\n";
+            else
+                msg += "❌\n";
+
+            msg += "Хостел ";
+            if (abiturient.IsNeedHostel == true)
+                msg += "✅\n";
+            else
+                msg += "❌\n";
+
+            msg += "ОПФР ";
+            if (abiturient.IsOpfr == true)
+                msg += "✅\n";
+            else
+                msg += "❌\n";
+
+            return msg;
+        }
     }
 }
