@@ -15,5 +15,6 @@ namespace AbiturientTGBot.Handlers
         public User User { get; set; }
         public string Message { get; set; }
         public ReplyKeyboardMarkup? ReplyKeyboard { get; set; }
+        public InlineKeyboardMarkup? InlineKeyboard {  get; set; }
     }
 }
