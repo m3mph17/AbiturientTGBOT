@@ -164,6 +164,8 @@ namespace AbiturientTGBot.Handlers
                     abiturient.IsNeedHostel = false;
 
                 abiturient.IsFull = true;
+                abiturient.FillingDate = DateTime.Now;
+
                 db.UpdateAbiturient(abiturient);
 
                 return messageHandle;
