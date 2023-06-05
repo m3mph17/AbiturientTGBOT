@@ -147,6 +147,26 @@ namespace AbiturientTGBot.Service
             return specialization;
         }
 
+        public string GetSpecName(int id)
+        {
+            string specName = db.Specializations.Where(s => s.SpecId == id)
+                .Select(s => s.Name)
+                .ToList()
+                .First();
+
+            return specName;
+        }
+
+        public int GetSpecClassReq(int id)
+        {
+            int classReq = db.Specializations.Where(s => s.SpecId == id)
+                .Select(s => s.ClassRequired)
+                .ToList()
+                .First();
+
+            return classReq;
+        }
+
         // Abiturient info
 
         public bool IsNewAbiturient(int id)
@@ -186,6 +206,12 @@ namespace AbiturientTGBot.Service
             {
                 return null;
             }
+        }
+
+        public IEnumerable<Abiturient> GetAllAbiturients()
+        {
+            IEnumerable<Abiturient> _abiturients = db.Abiturients.ToList();
+            return _abiturients;
         }
     }
 }
