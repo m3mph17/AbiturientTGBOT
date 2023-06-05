@@ -19,7 +19,6 @@ namespace AbiturientTGBot.Bot_QA
         public string BadHomeNumberInput { get; set; }
         public string BadPhoneNumberInput { get; set; }
         public string BadBirthdateInput { get; set; }
-        public string BadYesNoInput { get; set; }
         public string BadInvalidGroupInput { get; set; }
         public string BadSpecInput { get; set; }
         public string BadSchoolMarkInput { get; set; }
