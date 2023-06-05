@@ -146,6 +146,9 @@ namespace AbiturientTGBot.Service
                 if (message.Text.ToLower() == "тест проф. ориентации")
                 {
                     db.SetUserState(userId, "profTest");
+                    await botClient.SendTextMessageAsync(message.Chat,
+                        text: Answers.ProfTestSuggest,
+                        replyMarkup: keyboard.ProfTestInlineKeyboard);
                 }
 
                 string userState = db.GetUserState(userId);
