@@ -1,4 +1,5 @@
-﻿using AbiturientTGBot.Models;
+﻿using AbiturientTGBot.Bot_QA;
+using AbiturientTGBot.Models;
 using Newtonsoft.Json;
 using Telegram.Bot.Types.ReplyMarkups;
 using InlineKeyboardMarkup = Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup;
@@ -25,6 +26,7 @@ namespace AbiturientTGBot.Service
 
         // Inline keyboards
         public InlineKeyboardMarkup SocialInlineKeyboard { get; private set; }
+        public InlineKeyboardMarkup ProfTestInlineKeyboard { get; private set; }
 
         // Inline buttons
         public InlineKeyboardButton[][] socialButtons { get; private set; }
@@ -42,6 +44,38 @@ namespace AbiturientTGBot.Service
             InvalidGroupKeyboard = CreateInvalidGroupKeyboard();
             SocialInlineKeyboard = CreateSocialInlineKeyboard();
             socialButtons = CreateSocialButtons();
+            ProfTestInlineKeyboard = CreateProfInlineKeyboard();
+        }
+
+        public InlineKeyboardMarkup CreateProfInlineKeyboard()
+        {
+            InlineKeyboardButton[] firstProfLink = new InlineKeyboardButton[]
+            {
+                new InlineKeyboardButton("Тест #1")
+            };
+
+            firstProfLink[0].Url = "https://testometrika.com/business/test-to-determine-career/";
+
+            InlineKeyboardButton[] secondProfLink = new InlineKeyboardButton[]
+            {
+                new InlineKeyboardButton("Тест #2")
+            };
+
+            secondProfLink[0].Url = "https://www.profguide.io/test/category/proforient/";
+
+            InlineKeyboardButton[] thirdProfLink = new InlineKeyboardButton[]
+            {
+                new InlineKeyboardButton("Тест #3")
+            };
+
+            thirdProfLink[0].Url = "https://spo.mosmetod.ru/test/1";
+
+            InlineKeyboardButton[][] buttons = new InlineKeyboardButton[][]
+            { firstProfLink, secondProfLink, thirdProfLink };
+
+            InlineKeyboardMarkup keyboard = new InlineKeyboardMarkup(buttons);
+
+            return keyboard;
         }
 
         public InlineKeyboardMarkup CreateInlineKeyboard(InlineKeyboardButton[] buttons)
