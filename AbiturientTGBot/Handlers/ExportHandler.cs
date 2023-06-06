@@ -38,6 +38,19 @@ namespace AbiturientTGBot.Handlers
 
                 try
                 {
+                    if (Directory.Exists(exportFolder))
+                    {
+                        DirectoryInfo directoryInfo = new DirectoryInfo(exportFolder);
+                        FileInfo[] files = directoryInfo.GetFiles();
+
+                        foreach (FileInfo file in files)
+                        {
+                            file.Delete();
+                        }
+
+                        Console.WriteLine($"Папка {exportFolder} успешно очищена.");
+                    }
+
                     await package.SaveAsAsync(new FileInfo(excelName));
                 }
                 catch (Exception ex)
@@ -46,7 +59,7 @@ namespace AbiturientTGBot.Handlers
                         "Что-то пошло не так во время сохранения\nException message:" + ex.Message);
                 }
 
-                await Console.Out.WriteLineAsync($"Экспорт заявок в файл {excelName} завершен успешно");
+                await Console.Out.WriteLineAsync($"Экспорт заявок в по пути {excelName} завершен успешно");
             }
             stream.Position = 0;
         }
