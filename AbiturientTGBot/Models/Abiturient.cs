@@ -29,5 +29,6 @@ namespace AbiturientTGBot.Models
         public long? HomePhone { get; set; }
         public long? MobilePhone { get; set; }
         public string? BirthDate { get; set; }
+        public DateTime? FillingDate { get; set; }
     }
 }
